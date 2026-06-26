@@ -62,7 +62,7 @@ models:
 | `thinking_budget`     | string/int | ✗        | Reasoning effort control                                                              |
 | `task_budget`         | int/object | ✗        | Total token budget for an agentic task (forwarded to Anthropic; see [Task Budget](#task-budget)). |
 | `parallel_tool_calls` | boolean    | ✗        | Allow model to call multiple tools at once                                            |
-| `track_usage`         | boolean    | ✗        | Track and report token usage for this model                                           |
+| `track_usage`         | boolean    | ✗        | Track and report token usage for this model. For OpenAI-compatible providers, setting this to `false` omits the `stream_options` field from requests entirely (useful for servers that reject it). |
 | `routing`             | array      | ✗        | Rule-based routing to different models. See [Model Routing](../routing/index.md). |
 | `capabilities`        | object     | ✗        | Override attachment capabilities for this model. See [Attachment Capability Overrides](#attachment-capability-overrides). |
 | `provider_opts`       | object     | ✗        | Provider-specific options (see provider pages)                                        |

@@ -200,9 +200,16 @@ func (c *Client) CreateChatCompletionStream(ctx context.Context, messages []chat
 	params := openai.ChatCompletionNewParams{
 		Model:    c.ModelConfig.Model,
 		Messages: c.convertMessages(ctx, messages),
-		StreamOptions: openai.ChatCompletionStreamOptionsParam{
-			IncludeUsage: openai.Bool(trackUsage),
-		},
+	}
+
+	// Only send stream_options when usage tracking is enabled. The field has
+	// `omitzero`, so leaving it unset omits it from the request entirely. Some
+	// OpenAI-compatible servers reject any stream_options object (even
+	// include_usage:false), so track_usage:false lets users drop it completely.
+	if trackUsage {
+		params.StreamOptions = openai.ChatCompletionStreamOptionsParam{
+			IncludeUsage: openai.Bool(true),
+		}
 	}
 
 	if c.ModelConfig.Temperature != nil {
