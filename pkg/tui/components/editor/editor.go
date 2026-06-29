@@ -204,6 +204,10 @@ func New(hist *history.History, opts ...Option) Editor {
 	ta.Focus()
 	ta.ShowLineNumbers = false
 
+	// Add ctrl+left/right as aliases for word navigation (alt+left/right).
+	ta.KeyMap.WordBackward.SetKeys(appendUnique(ta.KeyMap.WordBackward.Keys(), "ctrl+left")...)
+	ta.KeyMap.WordForward.SetKeys(appendUnique(ta.KeyMap.WordForward.Keys(), "ctrl+right")...)
+
 	si := textinput.New()
 	si.Prompt = ""
 	si.Placeholder = "Type to search..."
@@ -645,6 +649,17 @@ func (e *editor) resetAndSend(content string) tea.Cmd {
 	e.userTyped = false
 	e.clearSuggestion()
 	return core.CmdHandler(messages.SendMsg{Content: content, Attachments: finalAttachments})
+}
+
+// appendUnique returns keys with extras appended, skipping any already present.
+func appendUnique(keys []string, extras ...string) []string {
+	out := slices.Clone(keys)
+	for _, k := range extras {
+		if !slices.Contains(out, k) {
+			out = append(out, k)
+		}
+	}
+	return out
 }
 
 // configureNewlineKeybinding sets up the newline keybinding from the

@@ -498,14 +498,6 @@ This release adds per-session markdown plan toolset support, extends `instructio
 - [#3312](https://github.com/docker/docker-agent/pull/3312) - fix: data race in stalledStream.Close using sync.Once
 - [#3313](https://github.com/docker/docker-agent/pull/3313) - docs: sync /docs with recent merged PRs
 
-
-## [Unreleased]
-
-## What's New
-
-- Extends the agent `instruction_file` field to accept a list of files in addition to a single path; when several files are listed, their contents are concatenated in order (separated by a blank line)
-
-
 ## [v1.90.0] - 2026-06-29
 
 This release adds support for OpenCode Go and OpenCode Zen providers and improves error handling for stream truncation during model inference.
@@ -648,6 +640,10 @@ This release brings significant new capabilities including a safety-check hook s
 - [#3300](https://github.com/docker/docker-agent/pull/3300) - chore: bump direct Go dependencies
 - [#3301](https://github.com/docker/docker-agent/pull/3301) - fix(hooks): cap oversized mcp and a2a tool results
 
+## [Unreleased]
+
+### Added
+- Editor: `ctrl+left`/`ctrl+right` now move the cursor by word, as aliases for the existing `alt+left`/`alt+right` bindings
 
 ## [v1.88.1] - 2026-06-26
 
