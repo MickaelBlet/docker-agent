@@ -2,11 +2,14 @@ package httpclient
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"maps"
 	"net/http"
 	"net/url"
+	"os"
 	"runtime"
+	"strings"
 	"sync/atomic"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
@@ -181,11 +184,30 @@ func newTransport(ctx context.Context) http.RoundTripper {
 	switch t := rt.(type) {
 	case *http.Transport:
 		t.DisableCompression = true
+		if insecureTLS() {
+			if t.TLSClientConfig == nil {
+				t.TLSClientConfig = &tls.Config{}
+			}
+			t.TLSClientConfig.InsecureSkipVerify = true
+		}
 	case interface{ DisableCompression() }:
 		t.DisableCompression()
 	}
 
 	return rt
+}
+
+// insecureTLS reports whether TLS certificate verification should be skipped
+// on outbound requests, controlled by CAGENT_INSECURE_SKIP_TLS_VERIFY. This is
+// intended for talking to internal/offline gateways with self-signed certs and
+// must not be enabled against untrusted networks.
+func insecureTLS() bool {
+	switch strings.ToLower(os.Getenv("CAGENT_INSECURE_SKIP_TLS_VERIFY")) {
+	case "1", "true", "yes":
+		return true
+	default:
+		return false
+	}
 }
 
 type userAgentTransport struct {

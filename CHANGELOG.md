@@ -644,6 +644,10 @@ This release brings significant new capabilities including a safety-check hook s
 
 ### Added
 - Editor: `ctrl+left`/`ctrl+right` now move the cursor by word, as aliases for the existing `alt+left`/`alt+right` bindings
+- HTTP: `CAGENT_INSECURE_SKIP_TLS_VERIFY` env var skips TLS certificate verification on all outbound requests (LLM providers and gateway) for internal/offline gateways with self-signed certs
+
+### Changed
+- OpenAI-compatible providers (openai and dmr) now omit `stream_options` from Chat Completions requests when `track_usage` is disabled, instead of sending `{"include_usage": false}`, for compatibility with servers that reject any `stream_options` object
 
 ## [v1.88.1] - 2026-06-26
 
