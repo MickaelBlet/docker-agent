@@ -13,3 +13,4 @@
 !/pkg/modelsdev/snapshot.json
 !/pkg/tools/builtin/mcpcatalog/servers.json
 !/pkg/tui/styles/themes/*.yaml
+!/scripts/build-offline-entrypoint.sh

@@ -1,0 +1,50 @@
+# syntax=docker/dockerfile:1
+#
+# Offline build image for docker-agent.
+#
+# This image bakes ONLY the cross-compilation toolchain (xx + zig) and the Go
+# module cache into its layers. The source is NOT baked in: you always build
+# from your working directory, mounted at /src. Nothing relies on BuildKit
+# cache mounts, so once the image exists you can compile with the network off.
+#
+# Build the image (needs network, do this once):
+#   docker build -f Dockerfile.offline -t docker-agent-build:offline .
+#
+# Compile both binaries OFFLINE from PWD source into ./dist:
+#   docker run --rm --network=none -v "$PWD:/src" -v "$PWD/dist:/out" \
+#     docker-agent-build:offline
+#
+# (or just use ./scripts/build-offline.sh)
+
+ARG GO_VERSION="1.26.4"
+ARG ALPINE_VERSION="3.22"
+ARG XX_VERSION="1.9.0"
+
+FROM --platform=$BUILDPLATFORM tonistiigi/xx:${XX_VERSION} AS xx
+
+FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine${ALPINE_VERSION}
+COPY --from=xx / /
+RUN apk add --no-cache bash clang file zig
+
+# Pre-install the cross sysroot for linux/amd64 (musl). Windows uses zig's
+# bundled mingw and needs no extra packages.
+RUN xx-apk --arch amd64 add --no-cache musl-dev
+
+WORKDIR /src
+ENV CGO_ENABLED=1
+ENV XX_GO_PREFER_C_COMPILER=zig
+
+# Warm the module cache INTO the image (not a cache mount, so it persists).
+COPY go.mod go.sum ./
+RUN go mod download
+
+# The source is NOT baked in — mount your working dir at /src when running.
+# The Go build cache is also not baked in (it would add several GB); mount a
+# named volume at /root/.cache/go-build for fast repeated builds.
+# See scripts/build-offline.sh.
+
+# Compile both binaries into /out (bind-mount /out when running).
+COPY scripts/build-offline-entrypoint.sh /usr/local/bin/build
+RUN chmod +x /usr/local/bin/build
+VOLUME /out
+ENTRYPOINT ["/usr/local/bin/build"]
